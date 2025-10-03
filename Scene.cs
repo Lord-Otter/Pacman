@@ -1,81 +1,93 @@
+using Pacman.Entities;
 using SFML.Graphics;
+using Pacman.Managers;
 
-namespace Pacman
+namespace Pacman;
+
+
+public delegate void ValueChangedEvent(Scene scene, int value);
+
+
+public sealed class Scene
 {
-    public class Scene
+    private List<Entity> entities = new List<Entity>();
+    public readonly SceneLoader Loader = new SceneLoader();
+    public readonly AssetManager Assets = new AssetManager();
+    public readonly EventManager Events = new EventManager();
+
+    public void Spawn(Entity entity)
     {
-        private List<Entity> entities = new List<Entity>();
-        public readonly SceneLoader Loader = new SceneLoader();
-        public readonly AssetManager Assets = new AssetManager();
+        entities.Add(entity);
+        entity.Create(this);
+    }
 
-        public void Spawn(Entity entity)
+    public void Clear()
+    {
+        for (int i = entities.Count - 1; i >= 0; i--)
         {
-            entities.Add(entity);
-            entity.Create(this);
-        }
-
-        public void Clear()
-        {
-            for (int i = entities.Count - 1; i >= 0; i--)
+            Entity entity = entities[i];
+            if (!entity.DontDestroyOnLoad)
             {
-                Entity entity = entities[i];
                 entities.RemoveAt(i);
                 entity.Destroy(this);
             }
         }
+    }
 
-        public void UpdateAll(float deltaTime)
+    public void UpdateAll(float deltaTime)
+    {
+        Loader.HandleSceneLoad(this);
+
+        // Update entities
+        for (int i = entities.Count - 1; i >= 0; i--)
         {
-            Loader.HandleSceneLoad(this);
-
-            for (int i = entities.Count - 1; i >= 0; i--)
-            {
-                entities[i].Update(this, deltaTime);
-            }
-
-            for (int i = 0; i < entities.Count;)
-            {
-                if (entities[i].Dead)
-                {
-                    entities.RemoveAt(i);
-                }
-                else
-                {
-                    i++;
-                }
-            }
+            entities[i].Update(this, deltaTime);
         }
 
-        public void RenderAll(RenderTarget target)
+        Events.DispatchEvents(this);
+
+        // Remove dead entities
+        for (int i = 0; i < entities.Count;)
         {
-            foreach (Entity entity in entities)
+            if (entities[i].Dead)
             {
-                entity.Render(target);
+                entities.RemoveAt(i);
+            }
+            else
+            {
+                i++;
             }
         }
+    }
 
-        public bool FindByType<T>(out T found) where T : Entity
+    public void RenderAll(RenderTarget target)
+    {
+        foreach (Entity entity in entities)
         {
-            found = entities.OfType<T>().Where(e => !e.Dead).FirstOrDefault()!;
-            return found != null;
+            entity.Render(target);
         }
+    }
 
-        public IEnumerable<Entity> FindIntersects(FloatRect bounds)
+    public bool FindByType<T>(out T found) where T : Entity
+    {
+        found = entities.OfType<T>().Where(e => !e.Dead).FirstOrDefault()!;
+        return found != null;
+    }
+
+    public IEnumerable<Entity> FindIntersects(FloatRect bounds)
+    {
+        int lastEntity = entities.Count - 1;
+        for (int i = lastEntity - 1; i >= 0; i--)
         {
-            int lastEntity = entities.Count - 1;
-            for (int i = lastEntity - 1; i >= 0; i--)
+            Entity entity = entities[i];
+            if (entity.Dead)
             {
-                Entity entity = entities[i];
-                if (entity.Dead)
-                {
-                    continue;
-                }
-                if (entity.Bounds.Intersects(bounds))
-                {
-                    yield return entity;
-                }
+                continue;
+            }
+            if (entity.Bounds.Intersects(bounds))
+            {
+                yield return entity;
             }
         }
-        
     }
 }

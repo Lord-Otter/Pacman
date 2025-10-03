@@ -1,48 +1,49 @@
 using SFML.Graphics;
 using SFML.System;
 
-namespace Pacman
+namespace Pacman.Entities;
+
+
+public class Entity
 {
-    public class Entity
+    private string textureName;
+    protected Sprite sprite = new Sprite();
+    public bool Dead;
+    public bool DontDestroyOnLoad = false;
+
+    protected Entity(string textureName)
     {
-        private string textureName;
-        protected Sprite sprite = new Sprite();
-        public bool Dead;
-        
-        protected Entity(string textureName)
-        {
-            this.textureName = textureName;
-        }
-
-        public Vector2f Position
-        {
-            get => sprite.Position;
-            set => sprite.Position = value;
-        }
-
-        public virtual FloatRect Bounds => sprite.GetGlobalBounds();
-        public virtual bool Solid => false;
-
-        public virtual void Create(Scene scene)
-        {
-            sprite.Texture = scene.Assets.LoadTexture(textureName);
-        }
-
-        public virtual void Destroy(Scene scene){}
-
-        public virtual void Update(Scene scene, float deltaTime)
-        {
-            foreach (Entity found in scene.FindIntersects(Bounds))
-            {
-                CollideWith(scene, found);
-            }
-        }
-
-        public virtual void Render(RenderTarget target)
-        {
-            target.Draw(sprite);
-        }
-
-        protected virtual void CollideWith(Scene scene, Entity other){}
+        this.textureName = textureName;
     }
+
+    public Vector2f Position
+    {
+        get => sprite.Position;
+        set => sprite.Position = value;
+    }
+
+    public virtual FloatRect Bounds => sprite.GetGlobalBounds();
+    public virtual bool Solid => false;
+
+    public virtual void Create(Scene scene)
+    {
+        sprite.Texture = scene.Assets.LoadTexture(textureName);
+    }
+
+    public virtual void Destroy(Scene scene) { }
+
+    public virtual void Update(Scene scene, float deltaTime)
+    {
+        foreach (Entity found in scene.FindIntersects(Bounds))
+        {
+            CollideWith(scene, found);
+        }
+    }
+
+    public virtual void Render(RenderTarget target)
+    {
+        target.Draw(sprite);
+    }
+
+    protected virtual void CollideWith(Scene scene, Entity other) { }
 }
