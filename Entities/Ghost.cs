@@ -42,7 +42,7 @@ public class Ghost : Actor
 
     protected override void CollideWith(Scene scene, Entity other)
     {
-        if (other is Pacman)
+        if (other is Pacman pacman && GracePeriodTimer <= 0 && pacman.GracePeriodTimer <= 0)
         {
             if (frozenTimer <= 0f)
                 scene.Events.PublishLoseHealth();

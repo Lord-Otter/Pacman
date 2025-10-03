@@ -1,5 +1,6 @@
 using SFML.Graphics;
 using SFML.System;
+using SFML.Window;
 
 namespace Pacman.Entities;
 
@@ -7,9 +8,10 @@ namespace Pacman.Entities;
 public class GUI : Entity
 {
     private Text scoreText;
-    private int maxHealth = 4;
+    private int maxHealth = 1;
     private int currentHealth;
     private int currentScore = 0;
+    private bool isGameOver = false;
 
     public GUI() : base("pacman")
     {
@@ -42,8 +44,9 @@ public class GUI : Entity
         currentHealth -= amount;
         if (currentHealth <= 0)
         {
-            DontDestroyOnLoad = false;
-            scene.Loader.Reload();
+            DontDestroyOnLoad = true;
+            scene.Clear();
+            isGameOver = true;
         }
     }
 
@@ -59,8 +62,39 @@ public class GUI : Entity
         }
     }
 
+    public override void Update(Scene scene, float deltaTime)
+    {
+        if (!isGameOver) return;
+
+        if (Keyboard.IsKeyPressed(Keyboard.Key.Space))
+        {
+            isGameOver = false;
+            scene.Loader.Reload();
+        }
+    }
+
     public override void Render(RenderTarget target)
     {
+        if (isGameOver)
+        {
+            // Draw game over
+            scoreText.CharacterSize = 100;
+            scoreText.DisplayedString = "GAME OVER";
+            scoreText.Position = new Vector2f((18 * 23 - scoreText.GetGlobalBounds().Width) / 2, 150);
+            target.Draw(scoreText);
+
+            // Draw highscore
+            scoreText.CharacterSize = 60;
+            scoreText.DisplayedString = $"HighScore: {}";
+            scoreText.Position = new Vector2f((18 * 23 - scoreText.GetGlobalBounds().Width) / 2, 150);
+
+            // Draw score
+            scoreText.DisplayedString = $"Score: {currentScore}";
+            scoreText.Position = new Vector2f((18 * 23 - scoreText.GetGlobalBounds().Width) / 2, 250);
+            target.Draw(scoreText);
+            return;
+        }
+
         sprite.Position = new Vector2f(36, 396);
         for (int i = 0; i < maxHealth; i++)
         {

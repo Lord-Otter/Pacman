@@ -15,8 +15,9 @@ public class Actor : Entity
 
     protected Vector2i textureOffset = new Vector2i(0, 0);
     private float animationTimer = 0f;
-    protected int frameCount = 2;
     protected int frame;
+
+    public float GracePeriodTimer { get; private set; } = 0f;
 
     protected Actor() : base("pacman")
     {
@@ -39,7 +40,9 @@ public class Actor : Entity
     public override void Update(Scene scene, float deltaTime)
     {
         animationTimer += deltaTime;
-        frame = (int)animationTimer % frameCount;
+        frame = (int)animationTimer % 2;
+
+        GracePeriodTimer = MathF.Max(GracePeriodTimer - deltaTime, 0f);
 
         base.Update(scene, deltaTime);
         if (IsAligned)
@@ -59,7 +62,7 @@ public class Actor : Entity
             wasAligned = false;
         }
 
-        if (!moving) return;
+        if (!moving || GracePeriodTimer > 0f) return;
 
         Position += ToVector(direction) * (speed * deltaTime);
         Position = MathF.Floor(Position.X) switch
@@ -79,6 +82,7 @@ public class Actor : Entity
         wasAligned = false;
         Position = originalPosition;
         speed = originalSpeed;
+        GracePeriodTimer = 1f;
     }
 
     public override void Create(Scene scene)
