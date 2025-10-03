@@ -9,7 +9,7 @@ public class Pacman : Actor
 {
     public override void Create(Scene scene)
     {
-        direction = -1;
+        moving = false;
         speed = 100f;
         base.Create(scene);
         sprite.TextureRect = new IntRect(0, 0, 18, 18);
@@ -35,7 +35,12 @@ public class Pacman : Actor
         else if (Keyboard.IsKeyPressed(Left)) { dir = 2; moving = true; }
         else if (Keyboard.IsKeyPressed(Down)) { dir = 3; moving = true; }
 
-        if (IsFree(scene, dir)) return dir;
+        if (IsFree(scene, dir))
+        {
+            sprite.TextureRect = new IntRect(0, 18 * dir, 18, 18);
+            return dir;
+        }
+
         if (!IsFree(scene, direction)) moving = false;
         return direction;
     }

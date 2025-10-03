@@ -13,13 +13,34 @@ public class Actor : Entity
     protected Vector2f originalPosition;
     protected float originalSpeed;
 
+    protected Vector2i textureOffset = new Vector2i(0, 0);
+    private float animationTimer = 0f;
+    protected int frameCount = 2;
+    protected int frame;
+
     protected Actor() : base("pacman")
     {
 
     }
 
+    public override FloatRect Bounds
+    {
+        get
+        {
+            FloatRect bounds = base.Bounds;
+            bounds.Top += 3;
+            bounds.Left += 3;
+            bounds.Width -= 6;
+            bounds.Height -= 6;
+            return bounds;
+        }
+    }
+
     public override void Update(Scene scene, float deltaTime)
     {
+        animationTimer += deltaTime;
+        frame = (int)animationTimer % frameCount;
+
         base.Update(scene, deltaTime);
         if (IsAligned)
         {
@@ -91,5 +112,11 @@ public class Actor : Entity
     protected virtual int PickDirection(Scene scene)
     {
         return 0;
+    }
+
+    public override void Render(RenderTarget target)
+    {
+        sprite.TextureRect = new IntRect(textureOffset.X + 18 * frame, textureOffset.Y + sprite.TextureRect.Top, 18, 18);
+        base.Render(target);
     }
 }

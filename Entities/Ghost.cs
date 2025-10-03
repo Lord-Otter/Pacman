@@ -1,4 +1,5 @@
 using SFML.Graphics;
+using SFML.System;
 
 namespace Pacman.Entities;
 
@@ -11,6 +12,7 @@ public class Ghost : Actor
 
     public override void Create(Scene scene)
     {
+        textureOffset = new Vector2i(36, 0);
         direction = -1;
         speed = 100f;
         moving = true;
@@ -33,8 +35,8 @@ public class Ghost : Actor
     public override void Render(RenderTarget target)
     {
         sprite.TextureRect = frozenTimer <= 0f
-        ? new IntRect(36, 0, 18, 18)
-        : new IntRect(36, 18, 18, 18);
+        ? new IntRect(0, 0, 0, 0)
+        : new IntRect(0, 18, 0, 0);
         base.Render(target);
     }
 
