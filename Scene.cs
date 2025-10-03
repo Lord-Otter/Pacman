@@ -5,9 +5,6 @@ using Pacman.Managers;
 namespace Pacman;
 
 
-public delegate void ValueChangedEvent(Scene scene, int value);
-
-
 public sealed class Scene
 {
     private List<Entity> entities = new List<Entity>();

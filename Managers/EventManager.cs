@@ -1,6 +1,9 @@
 namespace Pacman.Managers;
 
 
+public delegate void ValueChangedEvent(Scene scene, int value);
+
+
 public class EventManager
 {
     private int scoreGained = 0;
