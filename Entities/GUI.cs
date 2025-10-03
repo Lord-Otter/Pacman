@@ -8,9 +8,10 @@ namespace Pacman.Entities;
 public class GUI : Entity
 {
     private Text scoreText;
-    private int maxHealth = 1;
+    private int maxHealth = 4;
     private int currentHealth;
     private int currentScore = 0;
+    private int highScore;
     private bool isGameOver = false;
 
     public GUI() : base("pacman")
@@ -46,6 +47,7 @@ public class GUI : Entity
         {
             DontDestroyOnLoad = true;
             scene.Clear();
+            UpdateHighScore();
             isGameOver = true;
         }
     }
@@ -62,6 +64,24 @@ public class GUI : Entity
         }
     }
 
+    private void UpdateHighScore()
+    {
+        string highScoreFile = "assets/highscore.txt";
+
+        if (File.Exists(highScoreFile))
+        {
+            string content = File.ReadAllText(highScoreFile);
+            int.TryParse(content, out highScore);
+        }
+
+        if (currentScore > highScore)
+        {
+            highScore = currentScore;
+
+            File.WriteAllText(highScoreFile, highScore.ToString());
+        }
+    }
+
     public override void Update(Scene scene, float deltaTime)
     {
         if (!isGameOver) return;
@@ -69,6 +89,7 @@ public class GUI : Entity
         if (Keyboard.IsKeyPressed(Keyboard.Key.Space))
         {
             isGameOver = false;
+            DontDestroyOnLoad = false;
             scene.Loader.Reload();
         }
     }
@@ -83,15 +104,21 @@ public class GUI : Entity
             scoreText.Position = new Vector2f((18 * 23 - scoreText.GetGlobalBounds().Width) / 2, 150);
             target.Draw(scoreText);
 
+            scoreText.CharacterSize = 35;
+            scoreText.DisplayedString = "Press 'SPACE' to try again!";
+            scoreText.Position = new Vector2f((18 * 23 - scoreText.GetGlobalBounds().Width) / 2, 400);
+            target.Draw(scoreText);
+
             // Draw highscore
             scoreText.CharacterSize = 60;
-            scoreText.DisplayedString = $"HighScore: {}";
-            scoreText.Position = new Vector2f((18 * 23 - scoreText.GetGlobalBounds().Width) / 2, 150);
+            scoreText.DisplayedString = $"HighScore: {highScore}";
+            scoreText.Position = new Vector2f((18 * 23 - scoreText.GetGlobalBounds().Width) / 2, 250);
+            target.Draw(scoreText);
 
             // Draw score
             scoreText.DisplayedString = $"Score: {currentScore}";
-            scoreText.Position = new Vector2f((18 * 23 - scoreText.GetGlobalBounds().Width) / 2, 250);
-            target.Draw(scoreText);
+            scoreText.Position = new Vector2f((18 * 23 - scoreText.GetGlobalBounds().Width) / 2, 300);
+            target.Draw(scoreText); 
             return;
         }
 
